@@ -8,6 +8,12 @@ import stopSVG from './assets/icons/stop.svg'
 
 const NASA_API_KEY: string = import.meta.env.VITE_NASA_API_KEY
 const EARTH_IMAGES_SERVER: string = import.meta.env.VITE_EARTH_IMAGES_SERVER
+const EARTH_IMAGE_URL: string = import.meta.env.VITE_EARTH_IMAGE_URL
+const DAILY_ASTRONOMY_PICTURE_SERVER: string = import.meta.env.VITE_DAILY_ASTRONOMY_PICTURE_SERVER
+
+const currentDate = new Date()
+currentDate.setDate( currentDate.getDate() - 2 ) //get images of 2 days ago to ensure that the images are already available in the server
+const formatDate = currentDate.toISOString().split("T")[0]
 
 const getEarthImageURL = ( imageName: string, imageDate: string, extension: string = "png" ): string => {
 
@@ -16,7 +22,7 @@ const getEarthImageURL = ( imageName: string, imageDate: string, extension: stri
     const formatImageName: string = `${imageName}.${extension}`
     const [ year, month, day ] = imageDate.split("-")
   
-    const imageURL = `${EARTH_IMAGES_SERVER}/${year}/${month}/${day}/${extension}/${formatImageName}`
+    const imageURL = `${EARTH_IMAGE_URL}/${year}/${month}/${day}/${extension}/${formatImageName}?api_key=${NASA_API_KEY}`
 
     return imageURL 
   } catch (error) {
@@ -44,7 +50,7 @@ function App() {
     const getEarthImages = async() => {
       try {
         setLoading(true)
-        const response = await fetch(`https://api.nasa.gov/EPIC/api/natural/images?api_key=${NASA_API_KEY}`)
+        const response = await fetch(`${EARTH_IMAGES_SERVER}${formatDate}?api_key=${NASA_API_KEY}`)
         if (response.ok){
           let images = await response.json()
           images = images.map( ( ( image: IEarthImage ) => {
@@ -63,7 +69,7 @@ function App() {
 
     const getDailyImage = async() => {
       try {
-        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`)
+        const response = await fetch(`${DAILY_ASTRONOMY_PICTURE_SERVER}?api_key=${NASA_API_KEY}`)
         if (response.ok){
           const image = await response.json()
           setDailyImage(image)
@@ -219,6 +225,10 @@ function App() {
           /> 
         </div>
 
+      </div>
+
+      <div className='footer-container'>
+        <span>Created by Gustavo Soto Soto @Copyright {new Date().getFullYear()}</span>
       </div>
 
     </main>
